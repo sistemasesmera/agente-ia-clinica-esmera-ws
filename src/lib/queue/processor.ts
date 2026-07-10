@@ -79,7 +79,7 @@ async function processBatch(supabase: any, batch: any) {
 
   const treatmentsText = [
     esteticos.length > 0 && "TRATAMIENTOS ESTÉTICOS:\n" + esteticos.map((t: {
-      name: string; duration_minutes?: number; price?: number; description?: string; benefits?: string
+      name: string; duration_minutes?: number; price?: number; description?: string; benefits?: string; protocol?: string
     }) =>
       `- ${t.name}${t.duration_minutes ? ` (${t.duration_minutes} min)` : ""}${t.price != null ? ` — ${t.price}€` : " — Gratuito"}` +
       (t.description ? `\n  Descripción: ${t.description}` : "") +
