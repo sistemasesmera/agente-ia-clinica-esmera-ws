@@ -1,4 +1,4 @@
-import { sendMessage, sendPrivateNote } from "@/lib/chatwoot/client";
+import { sendMessage, sendPrivateNote, getConversation } from "@/lib/chatwoot/client";
 import { runAgent } from "@/lib/openai/agent";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,14 +47,9 @@ async function processBatch(supabase: any, batch: any) {
 
   const { conversation_id, chatwoot_conversation_id, content, chatwoot_contact_id } = batch;
 
-  // Obtener la conversación
-  const { data: conv } = await supabase
-    .from("conversations")
-    .select("id, agent_enabled")
-    .eq("id", conversation_id)
-    .single();
-
-  if (!conv?.agent_enabled) return;
+  // Verificar etiquetas directamente en Chatwoot (fuente de verdad)
+  const chatwootConv = await getConversation(chatwoot_conversation_id);
+  if ((chatwootConv?.labels ?? []).includes("agente_apagado")) return;
 
   // Cargar config del agente
   const { data: config } = await supabase

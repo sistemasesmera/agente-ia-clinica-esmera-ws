@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { processQueue } from "@/lib/queue/processor";
+import { getConversation } from "@/lib/chatwoot/client";
 
 const DEBOUNCE_MS = 5000;
 
@@ -79,7 +80,10 @@ async function handleEvent(supabase: any, payload: any) {
       if (!payload.content || !payload.conversation?.id) break;
 
       const conv = await upsertConversation(supabase, payload.conversation);
-      if (!conv?.agent_enabled) break;
+
+      // Verificar etiquetas directamente en Chatwoot (fuente de verdad)
+      const chatwootConv = await getConversation(payload.conversation.id);
+      if ((chatwootConv?.labels ?? []).includes("agente_apagado")) break;
 
       const processAfter = new Date(Date.now() + DEBOUNCE_MS).toISOString();
 
