@@ -56,18 +56,15 @@ export async function escalateToHuman(
 ): Promise<string> {
   const { chatwootConversationId, supabase, conversationId } = ctx;
 
-  // Desactivar agente IA para esta conversación
-  await supabase
-    .from("conversations")
-    .update({ agent_enabled: false })
-    .eq("id", conversationId);
+  // Apagar el agente y añadir motivo en Chatwoot (fuente de verdad)
+  const label = LABEL_MAP[args.type];
+  if (!label) throw new Error(`Tipo de escalado desconocido: ${args.type}`);
 
-  // Poner atributo agente_ia = Inactivo → dispara automatización de Chatwoot
-  await setConversationCustomAttribute(chatwootConversationId, { agente_ia: "Inactivo" });
-
-  // Etiqueta según el motivo
-  const label = LABEL_MAP[args.type] ?? "escalado";
-  await addLabel(chatwootConversationId, label);
+  await Promise.all([
+    addLabel(chatwootConversationId, "agente_apagado"),
+    addLabel(chatwootConversationId, label),
+    setConversationCustomAttribute(chatwootConversationId, { agente_ia: "Inactivo" }),
+  ]);
 
   // Nota privada para el comercial con el contexto
   await sendPrivateNote(
