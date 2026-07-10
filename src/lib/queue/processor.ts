@@ -1,4 +1,4 @@
-import { sendMessage } from "@/lib/chatwoot/client";
+import { sendMessage, sendPrivateNote } from "@/lib/chatwoot/client";
 import { runAgent } from "@/lib/openai/agent";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -147,6 +147,7 @@ async function processBatch(supabase: any, batch: any) {
 
   // Enviar respuesta por Chatwoot
   await sendMessage(chatwoot_conversation_id, reply);
+  await sendPrivateNote(chatwoot_conversation_id, "🤖 RESPUESTA AUTOMATIZADA");
 
   // Guardar respuesta
   await supabase.from("messages").insert({
